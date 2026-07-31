@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Para ti, Bibi</title>
+<style>
+  :root{
+    --paper:#fbf4ec; --paper-2:#f4e6d8;
+    --ink:#3a2f2b; --ink-soft:#6b5a51;
+    --rose:#b4576a; --rose-deep:#8f3f50; --gold:#c79a5b;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --script:"Snell Roundhand","Segoe Script","Bradley Hand",cursive;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:var(--serif); color:var(--ink);
+    background:
+      radial-gradient(900px 500px at 15% -10%, #fff7f0 0%, transparent 60%),
+      radial-gradient(800px 600px at 110% 115%, #f0d7dd 0%, transparent 55%),
+      linear-gradient(160deg,#f7ece1,#eeD9ca);
+    -webkit-font-smoothing:antialiased; touch-action:pan-y;
+  }
+  .bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .ic{position:absolute;color:var(--rose);animation:drift 18s ease-in-out infinite}
+  .ic.g{color:var(--gold)}
+  .ic svg{width:100%;height:100%;display:block;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+  @keyframes drift{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-14px) rotate(calc(var(--r,0deg) + 4deg))}}
+
+  .book{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column}
+  .stage{position:relative;flex:1;overflow:hidden}
+  .card{
+    position:absolute;inset:0;
+    padding:calc(env(safe-area-inset-top) + 34px) 26px 26px;
+    display:flex;flex-direction:column;justify-content:center;gap:14px;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    opacity:0;transform:translateY(18px);
+    transition:opacity .5s ease, transform .5s ease;
+    pointer-events:none;
+  }
+  .card.active{opacity:1;transform:none;pointer-events:auto}
+  .wrap{width:100%;max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+
+  p{
+    font-size:19px;line-height:1.72;color:var(--ink);
+    text-wrap:pretty;min-height:1.2em;
+  }
+  p.soft{color:var(--ink-soft);font-style:italic}
+  p.lead{font-size:22px;line-height:1.55}
+  p.accent{font-size:24px;line-height:1.4;color:var(--rose-deep);font-weight:600}
+  .eyebrow{
+    font-size:11px;letter-spacing:.34em;text-transform:uppercase;
+    color:var(--rose-deep);opacity:0;transition:opacity .6s ease .1s;
+  }
+  .active .eyebrow{opacity:.9}
+
+  /* typewriter cursor */
+  .tw.typing::after{
+    content:"▌";color:var(--rose);margin-left:1px;
+    animation:blink .9s steps(1) infinite;font-weight:400;
+  }
+  @keyframes blink{50%{opacity:0}}
+
+  /* cover */
+  .cover{text-align:center;align-items:center;justify-content:center}
+  .cover .heart{font-size:50px;color:var(--rose);animation:beat 2.4s ease-in-out infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}12%{transform:scale(1.18)}24%{transform:scale(1)}}
+  .cover h1{font-family:var(--script);font-size:clamp(52px,17vw,84px);color:var(--rose-deep);font-weight:400;line-height:1;margin:8px 0 16px}
+  .cover .sub{color:var(--ink-soft);font-style:italic;font-size:17px}
+
+  p.sign{font-family:var(--script);font-size:44px;color:var(--rose-deep);line-height:1;margin-top:2px}
+  p.pd{font-size:15px;color:var(--ink-soft);border-top:1px solid rgba(199,154,91,.45);padding-top:16px;margin-top:8px;font-style:italic}
+
+  .after{opacity:0;transform:translateY(8px);transition:opacity .6s ease,transform .6s ease;pointer-events:none}
+  .after.show{opacity:1;transform:none;pointer-events:auto}
+  .spotify{
+    display:inline-flex;align-items:center;gap:10px;margin-top:20px;align-self:flex-start;
+    background:#1db954;color:#fff;text-decoration:none;font-family:var(--serif);
+    font-size:17px;font-weight:600;padding:15px 22px;border-radius:999px;
+    box-shadow:0 10px 24px -6px rgba(29,185,84,.6);
+  }
+  .spotify:active{transform:scale(.97)}
+  .spotify svg{width:21px;height:21px;fill:#fff}
+
+  /* nav */
+  .bar{
+    display:flex;align-items:center;gap:14px;
+    padding:14px 20px calc(env(safe-area-inset-bottom) + 16px);
+  }
+  .progress{flex:1;height:4px;border-radius:99px;background:rgba(143,63,80,.18);overflow:hidden}
+  .progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--gold));border-radius:99px;transition:width .4s ease}
+  .count{font-size:13px;color:var(--ink-soft);font-variant-numeric:tabular-nums;min-width:44px;text-align:center}
+  .arrow{
+    width:48px;height:48px;border-radius:50%;flex:0 0 auto;
+    background:rgba(255,255,255,.75);border:1px solid rgba(180,87,106,.35);
+    color:var(--rose-deep);font-size:20px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .arrow:disabled{opacity:.3}
+  .arrow:active:not(:disabled){background:var(--rose);color:#fff}
+
+  .hint{
+    position:absolute;left:0;right:0;bottom:16px;text-align:center;
+    color:var(--ink-soft);font-size:13px;font-style:italic;opacity:.75;
+    transition:opacity .4s;pointer-events:none;
+  }
+  .hint.gone{opacity:0}
+  @media (prefers-reduced-motion:reduce){
+    .card{transition:opacity .2s}.tw.typing::after{display:none}
+  }
+  @media (min-width:640px){
+    p{font-size:20px}.card{padding-top:60px}
+  }
+</style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <symbol id="ic-palm" viewBox="0 0 24 24">
+      <path d="M12 21c-.3-5 .3-8 2.3-11.4"/>
+      <path d="M14.3 9.6C11.8 8 8.8 8.6 6.8 11c2.2-.8 3.8-.5 5 .3"/>
+      <path d="M14.3 9.6c2.5-1.6 5.5-1 7.5 1.4-2.2-.8-3.9-.5-5.1.3"/>
+      <path d="M14.3 9.6c.4-2.6-.7-5-3.2-6.4 1 2 1 3.6.5 5.1"/>
+      <circle cx="14.3" cy="9.6" r=".8"/>
+    </symbol>
+    <symbol id="ic-machu" viewBox="0 0 24 24">
+      <path d="M3 21h18"/>
+      <path d="M5 21v-2.5h2.5V16H10v-2.5h2V16h2.5v2.5H17V21"/>
+      <path d="M13 13.5l3.2-7.5 3.3 7.5"/>
+    </symbol>
+    <symbol id="ic-pisa" viewBox="0 0 24 24">
+      <path d="M8.4 21 9.8 7"/><path d="M14.6 20.5 15.8 7"/>
+      <path d="M9.6 7.2 15.9 7.8"/><path d="M8.2 20.8 15 21.4"/>
+      <path d="M9.3 11.3 15.4 11.8"/><path d="M9 15 15.1 15.5"/>
+    </symbol>
+    <symbol id="ic-dd" viewBox="0 0 24 24">
+      <path d="M5 9.5C5 7.6 8 6.5 12 6.5s7 1.1 7 3c0 4-3.2 8-7 8s-7-4-7-8z"/>
+      <path d="M8 6.7 6.6 3.8 9.2 5.4"/><path d="M16 6.7l1.4-2.9-2.6 1.6"/>
+      <path d="M8.6 10.8l2.2.3"/><path d="M13.2 11.1l2.2-.3"/>
+    </symbol>
+    <symbol id="ic-fleur" viewBox="0 0 24 24">
+      <path d="M12 2.5c-1.3 1.9-1.3 3.8 0 5.7 1.3-1.9 1.3-3.8 0-5.7z"/>
+      <path d="M12 8.2c-1.4-1.2-3.4-1-4.3.6-.7 1.3.1 2.8 1.5 3"/>
+      <path d="M12 8.2c1.4-1.2 3.4-1 4.3.6.7 1.3-.1 2.8-1.5 3"/>
+      <path d="M8 13.2h8"/><path d="M12 7.5v9.5"/>
+      <path d="M9.6 20.5c0-1.7 1-2.9 2.4-3.4 1.4.5 2.4 1.7 2.4 3.4"/>
+    </symbol>
+  </defs></svg>
+  <div class="bg" id="bg"></div>
+  <div class="book">
+    <div class="stage" id="stage"></div>
+    <div class="hint" id="hint">desliza o toca para continuar</div>
+    <div class="bar">
+      <button class="arrow" id="prev" aria-label="Anterior">‹</button>
+      <div class="progress"><i id="pfill"></i></div>
+      <span class="count" id="count"></span>
+      <button class="arrow" id="next" aria-label="Siguiente">›</button>
+    </div>
+  </div>
+
+<script>
+const SPOTIFY="https://open.spotify.com/track/4OJbPIZ17OsAqXNXbYwZcF";
+const P=[
+ {cover:true},
+ {eyebrow:"Antes de empezar",lines:[
+   ["lead","He pensado mucho antes de escribirte esto."],
+   ["","La verdad es que mi primera intención era respetar tu decisión y dejar las cosas ahí. Pensé que lo mejor era hacerme a la idea de que ya no había nada más que hacer y darte el espacio que necesitabas."],
+   ["","Pero con el paso de los días entendí que, si me quedaba callado, siempre iba a sentir que me faltó decirte algo muy importante."]]},
+ {lines:[
+   ["soft","No te escribo desde el desespero."],
+   ["soft","No te escribo porque no acepte tu decisión."],
+   ["soft","Y tampoco porque quiera presionarte para que cambies de opinión."],
+   ["","Te escribo porque necesito hacer un último intento desde el amor y desde la honestidad. Quiero poder mirar hacia atrás, pase lo que pase, y saber que no me guardé nada de lo que sentía por ti."]]},
+ {eyebrow:"Te escuché",lines:[
+   ["","Te escuché con mucha atención."],
+   ["","Entendí que esto no terminó porque faltara amor ni porque yo te estuviera pidiendo algo injusto. Entendí que estás viviendo un proceso muy tuyo, que necesitas entender muchas cosas de ti y que hoy no sientes que puedas vivir una relación con tranquilidad."],
+   ["soft","Y de verdad respeto eso."]]},
+ {eyebrow:"Cómo veo yo el amor",lines:[
+   ["","Para mí, amar nunca ha sido esperar a que todo esté resuelto para empezar a construir."],
+   ["","Siempre he creído que cuando uno encuentra a alguien con quien imagina una vida bonita, vale la pena incomodarse, conversar, hacer acuerdos, aprender, equivocarse y volver a intentar. No porque el amor garantice que todo va a salir bien, sino porque las cosas más valiosas de la vida siempre implican un riesgo."]]},
+ {lines:[
+   ["","Desde que llegaste a mi vida, muchas cosas que antes imaginaba solo empecé a imaginarlas contigo."],
+   ["soft","Cuando pienso en conocer Italia y perdernos por sus calles, pienso en ti."],
+   ["soft","Cuando pienso en ir a Isla Fuerte y conocer ese lugar que tanto amas, pienso en ti."],
+   ["soft","Cuando pienso en Perú, ese viaje que soñé regalarte, no logro imaginarme viviéndolo con alguien más."],
+   ["lead","Me di cuenta de que no son los viajes. Es que mis sueños empezaron a tener tu nombre."]]},
+ {eyebrow:"Desde la libertad",lines:[
+   ["","Si quiero estar contigo, quiero hacerlo desde la libertad. No desde el miedo a perderte. No desde la necesidad. Desde la libertad de poder escoger y seguir escogiéndote."],
+   ["","Una de las cosas que más admiré de ti fue tu libertad, tu independencia y la tranquilidad con la que vivías tu vida. Yo nunca quise quitarte eso. Al contrario."],
+   ["","La relación que soñaba contigo era una donde los dos pudiéramos seguir siendo nosotros mismos y, aun así, elegir caminar juntos."]]},
+ {lines:[
+   ["","No quiero pedirte que abandones tu proceso. Tampoco quiero que tomes una decisión hoy."],
+   ["","Lo único que quisiera pedirte es que no cierres definitivamente la puerta sin permitirte, cuando llegue el momento y hayas avanzado en tu camino, preguntarte con total honestidad si de verdad esto era lo que querías."],
+   ["soft","Yo sí creo que existe una posibilidad bonita entre nosotros. Y me gustaría que no muriera solo por miedo."]]},
+ {lines:[
+   ["","No sé cuál vaya a ser tu respuesta después de leer esto. Puede que siga siendo la misma. Y si lo es, la voy a respetar."],
+   ["","Pero necesitaba decirte que, si hoy me preguntas qué quiero, mi respuesta sigue siendo la misma."],
+   ["accent","Quiero construir contigo."]]},
+ {eyebrow:"Una última cosa",lines:[
+   ["","Me encantaría que pudiéramos vernos. No para que ese día tomes una decisión, ni porque espere salir de esa conversación siendo novios otra vez."],
+   ["","Me gustaría verte porque siento que esta historia merece una conversación más, mirándonos a los ojos. Poder abrazarte, decirte todo esto de frente, escuchar cómo te sientes, y que los dos podamos irnos con la tranquilidad de haber sido completamente honestos."],
+   ["","Si después de eso sigues sintiendo que este no es el camino, voy a aceptar tu decisión."]]},
+ {last:true,lines:[
+   ["","Gracias por todo lo que vivimos."],
+   ["","Gracias por enseñarme una forma distinta de amar."],
+   ["","Y gracias por haber sido la mujer con la que soñé tantos momentos bonitos."],
+   ["soft","Con todo mi amor,"],
+   ["sign","Santi"],
+   ["pd","P. D. Si algún día tienes un momento, escucha “Óleo de mujer con sombrero”, de Silvio Rodríguez. Esa canción explica mucho mejor que yo la manera en que entiendo el amor."]]}
+];
+
+const reduced=matchMedia("(prefers-reduced-motion:reduce)").matches;
+const stage=document.getElementById('stage');
+const cards=P.map(pg=>{
+  const c=document.createElement('div');c.className='card'+(pg.cover?' cover':'');
+  const w=document.createElement('div');w.className='wrap';c.appendChild(w);
+  if(pg.cover){
+    w.innerHTML=`<div class="heart">♥</div><h1>Para ti, Bibi</h1><div class="sub">una carta, página por página</div>`;
+  }else{
+    if(pg.eyebrow){const e=document.createElement('div');e.className='eyebrow';e.textContent=pg.eyebrow;w.appendChild(e);}
+    pg.lines.forEach(([cls,t])=>{
+      const p=document.createElement('p');p.className='tw '+cls;p.dataset.t=t;w.appendChild(p);
+    });
+    if(pg.last){
+      const a=document.createElement('a');a.className='spotify after';a.href=SPOTIFY;a.target="_blank";a.rel="noopener";
+      a.innerHTML=`<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.44c-.19.31-.59.41-.9.22-2.46-1.5-5.56-1.84-9.21-1.01-.35.08-.7-.14-.78-.49-.08-.35.14-.7.49-.78 4-.92 7.43-.52 10.19 1.16.31.19.41.6.21.9zm1.23-2.73c-.24.38-.74.5-1.12.27-2.81-1.73-7.1-2.23-10.42-1.22-.43.13-.88-.11-1.01-.54-.13-.43.11-.88.54-1.01 3.8-1.15 8.53-.59 11.76 1.39.38.23.5.74.25 1.11zm.11-2.84C14.7 8.87 9.4 8.69 6.3 9.63c-.51.15-1.05-.13-1.2-.64-.15-.51.13-1.05.64-1.2 3.56-1.08 9.42-.87 13.14 1.33.46.27.61.87.34 1.33-.27.45-.87.6-1.33.33z"/></svg> Escuchar la canción`;
+      w.appendChild(a);
+    }
+  }
+  stage.appendChild(c);return c;
+});
+
+// ---- fondo con íconos ----
+const ICONS=[
+ ['palm',6,10,52,-8,.14,16,0],['fleur',86,8,40,10,.16,19,1],
+ ['machu',78,21,60,0,.10,21,0],['pisa',12,31,46,6,.12,18,1],
+ ['dd',90,41,38,-6,.13,15,0],['fleur',4,53,34,-12,.12,20,1],
+ ['palm',88,63,48,8,.12,17,0],['machu',7,73,52,0,.11,22,1],
+ ['pisa',80,79,44,-8,.13,16,0],['dd',16,89,40,10,.12,19,1],
+ ['fleur',50,93,36,0,.10,18,0],['palm',46,4,40,6,.10,20,1],
+ ['machu',31,61,40,0,.07,23,0],['pisa',64,50,36,6,.07,17,1],
+ ['dd',60,13,34,-8,.09,15,0],['fleur',25,23,30,12,.09,21,1]
+];
+const bg=document.getElementById('bg');
+ICONS.forEach(([t,l,tp,s,r,op,dur,gold],n)=>{
+  const d=document.createElement('div');d.className='ic'+(gold?' g':'');
+  d.style.cssText=`left:${l}%;top:${tp}%;width:${s}px;height:${s}px;opacity:${op};--r:${r}deg;animation-duration:${dur}s;animation-delay:-${n}s`;
+  d.innerHTML=`<svg viewBox="0 0 24 24"><use href="#ic-${t}"/></svg>`;
+  bg.appendChild(d);
+});
+
+let i=0, typing=false, skip=false, token=0;
+const prevB=document.getElementById('prev'),nextB=document.getElementById('next');
+const count=document.getElementById('count'),pfill=document.getElementById('pfill');
+const hint=document.getElementById('hint');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const delayFor=ch=>{ if('.!?…'.includes(ch))return 240; if(',;:—'.includes(ch))return 130; return 18; };
+
+async function typeCard(c){
+  const my=++token; typing=true; skip=false;
+  const els=[...c.querySelectorAll('.tw')];
+  els.forEach(e=>e.textContent='');
+  c.querySelectorAll('.after').forEach(e=>e.classList.remove('show'));
+  if(reduced){ els.forEach(e=>e.textContent=e.dataset.t); c.querySelectorAll('.after').forEach(e=>e.classList.add('show')); typing=false; return; }
+  for(const e of els){
+    e.classList.add('typing');const t=e.dataset.t;
+    for(let k=0;k<t.length;k++){
+      if(my!==token)return;
+      if(skip){e.textContent=t;break;}
+      e.textContent=t.slice(0,k+1);
+      await sleep(delayFor(t[k]));
+    }
+    if(my!==token)return;
+    e.textContent=t;e.classList.remove('typing');
+    if(skip){els.forEach(x=>x.textContent=x.dataset.t);break;}
+    await sleep(200);
+  }
+  if(my!==token)return;
+  c.querySelectorAll('.after').forEach(e=>e.classList.add('show'));
+  typing=false;
+}
+function render(){
+  cards.forEach((c,n)=>c.classList.toggle('active',n===i));
+  prevB.disabled=i===0;nextB.disabled=i===P.length-1;
+  count.textContent=(i+1)+" / "+P.length;
+  pfill.style.width=((i)/(P.length-1)*100)+"%";
+  if(!P[i].cover) typeCard(cards[i]); else {typing=false;token++;}
+}
+function next(){ if(typing){skip=true;return;} if(i<P.length-1){i++;render();} }
+function prev(){ if(i>0){i--;render();} }
+nextB.onclick=next; prevB.onclick=prev;
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')prev();});
+
+let sx=0,sy=0;
+stage.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+stage.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)){ dx<0?next():prev(); }
+  else if(Math.abs(dx)<10 && Math.abs(dy)<10){ if(typing)skip=true; } // tap = completar
+  hint.classList.add('gone');
+},{passive:true});
+stage.addEventListener('click',e=>{ if(e.target.closest('a'))return; hint.classList.add('gone'); });
+
+render();
+</script>
+</body>
+</html>
