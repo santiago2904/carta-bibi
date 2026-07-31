@@ -189,6 +189,23 @@
 
 <script>
 const SPOTIFY="https://open.spotify.com/track/4OJbPIZ17OsAqXNXbYwZcF";
+
+// ===== Notificación al abrir la carta (ntfy.sh) =====
+// 1) Instala la app "ntfy" en tu celular (iOS/Android) o abre https://ntfy.sh
+// 2) Suscríbete EXACTAMENTE a este tema (topic):
+const NTFY_TOPIC = "carta-bibi-santi-9k2mx7";   // <- cámbialo por algo único tuyo
+// 3) Listo: cuando alguien abra la página, te llega un push.
+(function(){
+  try{
+    if(!NTFY_TOPIC) return;
+    fetch("https://ntfy.sh/"+NTFY_TOPIC, {
+      method:"POST",
+      body:"💌 Alguien abrió la carta — "+new Date().toLocaleString("es-CO"),
+      headers:{ "Title":"Carta para Bibi", "Priority":"high", "Tags":"heart,love_letter" },
+      keepalive:true
+    }).catch(function(){});
+  }catch(e){}
+})();
 const P=[
  {cover:true},
  {eyebrow:"Antes de empezar",lines:[
