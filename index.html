@@ -149,7 +149,7 @@
   <div class="bg" id="bg"></div>
   <div class="book">
     <div class="stage" id="stage"></div>
-    <div class="hint" id="hint">desliza o toca para continuar</div>
+    <div class="hint" id="hint">desliza en cualquier dirección o toca para continuar</div>
     <div class="bar">
       <button class="arrow" id="prev" aria-label="Anterior">‹</button>
       <div class="progress"><i id="pfill"></i></div>
@@ -291,15 +291,32 @@ function prev(){ if(i>0){i--;render();} }
 nextB.onclick=next; prevB.onclick=prev;
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')prev();});
 
+const canScroll=c=>c.scrollHeight-c.clientHeight>4;
 let sx=0,sy=0;
 stage.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
 stage.addEventListener('touchend',e=>{
   const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
-  if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)){ dx<0?next():prev(); }
-  else if(Math.abs(dx)<10 && Math.abs(dy)<10){ if(typing)skip=true; } // tap = completar
+  const c=cards[i];
+  if(Math.abs(dx)<10 && Math.abs(dy)<10){ if(typing)skip=true; hint.classList.add('gone'); return; } // tap = completar
+  if(Math.abs(dx)>Math.abs(dy)){                       // horizontal
+    if(Math.abs(dx)>45) dx<0?next():prev();
+  } else if(Math.abs(dy)>45){                           // vertical
+    if(canScroll(c)){                                   // respeta scroll de páginas largas
+      const atTop=c.scrollTop<=2, atBottom=c.scrollTop+c.clientHeight>=c.scrollHeight-2;
+      if(dy<0 && atBottom) next();
+      else if(dy>0 && atTop) prev();
+    } else { dy<0?next():prev(); }                      // arriba = siguiente, abajo = anterior
+  }
   hint.classList.add('gone');
 },{passive:true});
 stage.addEventListener('click',e=>{ if(e.target.closest('a'))return; hint.classList.add('gone'); });
+// rueda del mouse / trackpad (desktop)
+let wlock=false;
+stage.addEventListener('wheel',e=>{
+  if(canScroll(cards[i])) return;
+  if(wlock) return; wlock=true; setTimeout(()=>wlock=false,650);
+  e.deltaY>0?next():prev(); hint.classList.add('gone');
+},{passive:true});
 
 render();
 </script>
