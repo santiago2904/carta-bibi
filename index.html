@@ -231,11 +231,22 @@ var NTFY_SID = Math.random().toString(36).slice(2,7).toUpperCase();
 function ntfyEvent(title, body, priority){
   try{
     if(!NTFY_TOPIC) return;
-    fetch("https://ntfy.sh/"+NTFY_TOPIC, {
-      method:"POST",
-      body: body + "\n#" + NTFY_SID + " · " + new Date().toLocaleTimeString("es-CO"),
-      headers:{ "Title": title, "Priority": priority||"low", "Tags":"heart" },
-      keepalive:true
+    var pmap = {min:1, low:2, default:3, high:4, max:5};
+    var payload = JSON.stringify({
+      topic: NTFY_TOPIC,
+      title: title,
+      message: body + "\n#" + NTFY_SID + " · " + new Date().toLocaleTimeString("es-CO"),
+      priority: pmap[priority||"low"] || 3,
+      tags: ["heart"]
+    });
+    // sendBeacon envía aunque la página navegue (p. ej. al abrir Spotify)
+    if(navigator.sendBeacon){
+      var blob = new Blob([payload], {type:"application/json"});
+      if(navigator.sendBeacon("https://ntfy.sh/", blob)) return;
+    }
+    fetch("https://ntfy.sh/", {
+      method:"POST", body:payload,
+      headers:{ "Content-Type":"application/json" }, keepalive:true
     }).catch(function(){});
   }catch(e){}
 }
