@@ -225,6 +225,20 @@ const NTFY_TOPIC = "carta-bibi-santi-9k2mx7";   // <- cámbialo por algo único 
     }).catch(function(){});
   }catch(e){}
 })();
+
+// ===== Trazabilidad: sesión + helper =====
+var NTFY_SID = Math.random().toString(36).slice(2,7).toUpperCase();
+function ntfyEvent(title, body, priority){
+  try{
+    if(!NTFY_TOPIC) return;
+    fetch("https://ntfy.sh/"+NTFY_TOPIC, {
+      method:"POST",
+      body: body + "\n#" + NTFY_SID + " · " + new Date().toLocaleTimeString("es-CO"),
+      headers:{ "Title": title, "Priority": priority||"low", "Tags":"heart" },
+      keepalive:true
+    }).catch(function(){});
+  }catch(e){}
+}
 const P=[
  {cover:true},
  {eyebrow:"Antes de empezar",lines:[
@@ -282,6 +296,7 @@ const cards=P.map(pg=>{
     if(pg.spotify||pg.last){
       const a=document.createElement('a');a.className='spotify after';a.href=SPOTIFY;a.target="_blank";a.rel="noopener";
       a.innerHTML=`<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.44c-.19.31-.59.41-.9.22-2.46-1.5-5.56-1.84-9.21-1.01-.35.08-.7-.14-.78-.49-.08-.35.14-.7.49-.78 4-.92 7.43-.52 10.19 1.16.31.19.41.6.21.9zm1.23-2.73c-.24.38-.74.5-1.12.27-2.81-1.73-7.1-2.23-10.42-1.22-.43.13-.88-.11-1.01-.54-.13-.43.11-.88.54-1.01 3.8-1.15 8.53-.59 11.76 1.39.38.23.5.74.25 1.11zm.11-2.84C14.7 8.87 9.4 8.69 6.3 9.63c-.51.15-1.05-.13-1.2-.64-.15-.51.13-1.05.64-1.2 3.56-1.08 9.42-.87 13.14 1.33.46.27.61.87.34 1.33-.27.45-.87.6-1.33.33z"/></svg> Escuchar la canción`;
+      a.addEventListener('click', function(){ ntfyEvent("🎵 Le dio a Spotify", "Abrió la canción en Spotify", "high"); });
       w.appendChild(a);
     }
   }
@@ -311,6 +326,7 @@ ICONS.forEach(([t,l,tp,s,r,op,dur,gold],n)=>{
 });
 
 let i=0, typing=false, skip=false, token=0;
+const seenPages=new Set();
 const prevB=document.getElementById('prev'),nextB=document.getElementById('next');
 const count=document.getElementById('count'),pfill=document.getElementById('pfill');
 const hint=document.getElementById('hint');
@@ -345,6 +361,9 @@ function render(){
   prevB.disabled=i===0;nextB.disabled=i===P.length-1;
   count.textContent=(i+1)+" / "+P.length;
   pfill.style.width=((i)/(P.length-1)*100)+"%";
+  var last = P.length - 1, mid = Math.floor(last/2);
+  if(i>=mid && !seenPages.has('mid')){ seenPages.add('mid'); ntfyEvent("Va por la mitad de la carta", "📖 Página " + (i+1) + "/" + P.length, "default"); }
+  if(i===last && !seenPages.has('end')){ seenPages.add('end'); ntfyEvent("Llegó al final de la carta", "📖 Terminó de leerla", "high"); }
   if(!P[i].cover) typeCard(cards[i]); else {typing=false;token++;}
 }
 function next(){ if(typing){skip=true;return;} if(i<P.length-1){i++;render();} }
