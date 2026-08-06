@@ -1,0 +1,75 @@
+:root {
+  --paper: #fbf4ec;
+  --paper-2: #f4e6d8;
+  --ink: #3a2f2b;
+  --ink-soft: #6b5a51;
+  --rose: #b4576a;
+  --rose-deep: #8f3f50;
+  --gold: #c79a5b;
+  --serif:
+    "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia,
+    serif;
+  --script: "Snell Roundhand", "Segoe Script", "Bradley Hand", cursive;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  font-family: var(--serif);
+  color: var(--ink);
+  background:
+    radial-gradient(900px 500px at 15% -10%, #fff7f0 0%, transparent 60%),
+    radial-gradient(800px 600px at 110% 115%, #f0d7dd 0%, transparent 55%),
+    linear-gradient(160deg, #f7ece1, #eed9ca);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* fondo animado */
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ic {
+  position: absolute;
+  color: var(--rose);
+  animation: drift 18s ease-in-out infinite;
+}
+.ic.g {
+  color: var(--gold);
+}
+.ic svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ic.emo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  filter: grayscale(0.2) sepia(0.1);
+}
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translateY(-14px) rotate(calc(var(--r, 0deg) + 4deg));
+  }
+}
